@@ -139,6 +139,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    document.getElementById('form-registro-navbar').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+            nombre: document.getElementById('reg-nombre').value.trim(),
+            apellido: document.getElementById('reg-apellido').value.trim(),
+            correo: document.getElementById('reg-correo').value.trim(),
+            username: document.getElementById('reg-username').value.trim(),
+            password: document.getElementById('reg-password').value
+        };
+        try {
+            const nuevoUser = await fetchAPI('/api/usuarios', { method: 'POST', body: JSON.stringify(payload) });
+            guardarSesion(nuevoUser);
+            modalLogin.hide();
+            e.target.reset();
+            showToast('Cuenta creada con éxito e inicio de sesión automático.', 'success');
+            verificarSesion();
+        } catch (err) {}
+    });
+
+    document.getElementById('modalLogin').addEventListener('hidden.bs.modal', () => {
+        document.getElementById('form-login').reset();
+        document.getElementById('form-registro-navbar').reset();
+        document.getElementById('login-error-msg').classList.add('d-none');
+        const firstTab = document.querySelector('#tab-acceder-link');
+        if (firstTab) {
+            const tabInstance = bootstrap.Tab.getInstance(firstTab) || new bootstrap.Tab(firstTab);
+            tabInstance.show();
+        }
+    });
+
     btnLogout.addEventListener('click', () => {
         localStorage.removeItem('atelier_session');
         showToast('Sesion cerrada correctamente.', 'info');
@@ -286,13 +316,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td class="small">${formatearHorarios(t.horarios)}</td>
                     <td><strong class="text-primary">${ocupados}</strong> / ${t.cupos}</td>
                     <td class="text-end">
-                        <button class="btn btn-outline-secondary btn-sm me-1" title="Exportar alumnos PDF" onclick="exportarAlumnosPDF(${t.id})">
+                        <button class="btn btn-outline-secondary btn-sm btn-icon-only me-1" title="Exportar alumnos PDF" onclick="exportarAlumnosPDF(${t.id})">
                             <i class="fa-solid fa-file-pdf"></i>
                         </button>
-                        <button class="btn btn-outline-dark btn-sm me-1" onclick="prepararEditarTaller(${t.id})">
+                        <button class="btn btn-outline-dark btn-sm btn-icon-only me-1" onclick="prepararEditarTaller(${t.id})">
                             <i class="fa-solid fa-pen"></i>
                         </button>
-                        <button class="btn btn-outline-danger btn-sm" onclick="eliminarTaller(${t.id})">
+                        <button class="btn btn-outline-danger btn-sm btn-icon-only" onclick="eliminarTaller(${t.id})">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
@@ -312,10 +342,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><strong>${c.id}</strong></td>
                 <td>${c.nombre_categoria}</td>
                 <td class="text-end">
-                    <button class="btn btn-outline-dark btn-sm me-1" onclick="prepararEditarCategoria(${c.id})">
+                    <button class="btn btn-outline-dark btn-sm btn-icon-only me-1" onclick="prepararEditarCategoria(${c.id})">
                         <i class="fa-solid fa-pen"></i>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm" onclick="eliminarCategoria(${c.id})">
+                    <button class="btn btn-outline-danger btn-sm btn-icon-only" onclick="eliminarCategoria(${c.id})">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </td>
@@ -337,10 +367,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${i.nombre} ${i.apellido}</td>
                     <td><span class="badge bg-light text-dark">${cat ? cat.nombre_categoria : 'Ninguna'}</span></td>
                     <td class="text-end">
-                        <button class="btn btn-outline-dark btn-sm me-1" onclick="prepararEditarInstructor(${i.id})">
+                        <button class="btn btn-outline-dark btn-sm btn-icon-only me-1" onclick="prepararEditarInstructor(${i.id})">
                             <i class="fa-solid fa-pen"></i>
                         </button>
-                        <button class="btn btn-outline-danger btn-sm" onclick="eliminarInstructor(${i.id})">
+                        <button class="btn btn-outline-danger btn-sm btn-icon-only" onclick="eliminarInstructor(${i.id})">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
@@ -362,10 +392,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${u.correo}</td>
                 <td><code class="text-indigo">${u.username}</code></td>
                 <td class="text-end">
-                    <button class="btn btn-outline-dark btn-sm me-1" onclick="prepararEditarUsuario(${u.id})">
+                    <button class="btn btn-outline-dark btn-sm btn-icon-only me-1" onclick="prepararEditarUsuario(${u.id})">
                         <i class="fa-solid fa-pen"></i>
                     </button>
-                    ${u.role === 'admin' ? '' : `<button class="btn btn-outline-danger btn-sm" onclick="eliminarUsuario(${u.id})"><i class="fa-solid fa-trash"></i></button>`}
+                    ${u.role === 'admin' ? '' : `<button class="btn btn-outline-danger btn-sm btn-icon-only" onclick="eliminarUsuario(${u.id})"><i class="fa-solid fa-trash"></i></button>`}
                 </td>
             </tr>
         `).join('');

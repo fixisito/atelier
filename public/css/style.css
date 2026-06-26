@@ -394,3 +394,39 @@ hr {
 #paso-2-existente .form-label {
     font-size: 0.85rem;
 }
+
+#loginTabs {
+    border-bottom: none;
+}
+
+#loginTabs .nav-item .nav-link {
+    color: rgba(255, 255, 255, 0.75) !important;
+    background-color: transparent !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    border-radius: 0;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.25s ease;
+}
+
+#loginTabs .nav-item .nav-link.active {
+    color: #ffffff !important;
+    border-bottom-color: var(--accent-terracotta) !important;
+    opacity: 1 !important;
+    font-weight: 700;
+}
+
+#loginTabs .nav-item .nav-link:hover {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+.btn-icon-only {
+    width: 32px;
+    height: 32px;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+}
