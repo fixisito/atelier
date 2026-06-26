@@ -157,7 +157,7 @@
                                                 <th>Nombre Taller</th>
                                                 <th>Categoria</th>
                                                 <th>Instructor</th>
-                                                <th>Horario</th>
+                                                <th>Horarios</th>
                                                 <th>Cupos</th>
                                                 <th class="text-end">Acciones</th>
                                             </tr>
@@ -347,30 +347,26 @@
                                 <option value="">Seleccione un instructor</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label for="taller-dia" class="form-label fw-semibold">Dia de la semana</label>
-                            <select id="taller-dia" class="form-select form-control-custom" required>
-                                <option value="Lunes">Lunes</option>
-                                <option value="Martes">Martes</option>
-                                <option value="Miercoles">Miercoles</option>
-                                <option value="Jueves">Jueves</option>
-                                <option value="Viernes">Viernes</option>
-                                <option value="Sabado">Sabado</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="taller-hora" class="form-label fw-semibold">Hora de inicio</label>
-                            <input type="time" id="taller-hora" class="form-control form-control-custom" required>
-                        </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label for="taller-cupos" class="form-label fw-semibold">Cupos Disponibles</label>
-                            <input type="number" id="taller-cupos" class="form-control form-control-custom" min="1"
-                                required>
+                            <input type="number" id="taller-cupos" class="form-control form-control-custom" min="1" required>
                         </div>
-                        <div class="col-md-8">
+                        <div class="col-md-12">
                             <label for="taller-descripcion" class="form-label fw-semibold">Descripcion</label>
-                            <textarea id="taller-descripcion" class="form-control form-control-custom" rows="3"
-                                required></textarea>
+                            <textarea id="taller-descripcion" class="form-control form-control-custom" rows="3" required></textarea>
+                        </div>
+
+                        <!-- Seccion de horarios multiples -->
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label fw-semibold mb-0">Horarios del Taller</label>
+                                <button type="button" class="btn btn-outline-dark btn-sm" onclick="agregarFilaHorario()">
+                                    <i class="fa-solid fa-plus me-1"></i> Agregar Horario
+                                </button>
+                            </div>
+                            <div id="contenedor-horarios">
+                                <!-- Las filas de horario se generan con JS -->
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer modal-footer-custom">
@@ -514,68 +510,124 @@
         </div>
     </div>
 
+    <!-- Modal preinscripcion con pasos: 1) verificar correo, 2) datos o contraseña, 3) confirmar -->
     <div class="modal fade" id="modalPreinscripcion" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content modal-content-custom">
                 <div class="modal-header modal-header-custom">
-                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-pen-nib me-2"></i>Formulario de Inscripcion
-                    </h5>
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-pen-nib me-2"></i>Inscripcion al Taller</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="form-preinscripcion">
+                <div class="modal-body modal-body-custom">
                     <input type="hidden" id="preinscripcion-taller-id">
-                    <div class="modal-body modal-body-custom row g-3">
-                        <div class="col-12 bg-light p-3 rounded mb-2 border">
-                            <h6 class="fw-bold text-dark mb-1"><i class="fa-solid fa-circle-info me-1 text-primary"></i>
-                                Taller Seleccionado:</h6>
-                            <span id="preinscripcion-taller-nombre" class="fw-semibold text-primary">Taller de
-                                Ceramica</span>
-                            <div class="small text-muted mt-1">
-                                <span class="me-3"><i class="fa-regular fa-calendar me-1"></i> <span
-                                        id="preinscripcion-taller-dia">Lunes</span></span>
-                                <span><i class="fa-regular fa-clock me-1"></i> <span
-                                        id="preinscripcion-taller-hora">10:00:00</span></span>
+
+                    <!-- Info del taller seleccionado -->
+                    <div class="bg-light p-3 rounded mb-3 border">
+                        <h6 class="fw-bold text-dark mb-1"><i class="fa-solid fa-circle-info me-1 text-primary"></i> Taller Seleccionado:</h6>
+                        <span id="preinscripcion-taller-nombre" class="fw-semibold text-primary"></span>
+                        <div class="small text-muted mt-1" id="preinscripcion-taller-horarios"></div>
+                    </div>
+
+                    <!-- Paso 1: Ingresar correo -->
+                    <div id="paso-1">
+                        <p class="small text-muted mb-2">Ingresa tu correo para verificar si ya tienes una cuenta.</p>
+                        <label for="pre-correo" class="form-label fw-semibold">Correo Electronico</label>
+                        <input type="email" id="pre-correo" class="form-control form-control-custom" placeholder="ejemplo@correo.com">
+                        <button type="button" class="btn btn-primary-custom w-100 mt-3" onclick="verificarCorreoPreinscripcion()">
+                            Continuar <i class="fa-solid fa-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+
+                    <!-- Paso 2a: El correo NO existe - completar registro -->
+                    <div id="paso-2-nuevo" class="d-none">
+                        <p class="small text-muted mb-3">Correo no registrado. Completa tus datos para crear tu cuenta.</p>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Nombre</label>
+                                <input type="text" id="pre-nombre" class="form-control form-control-custom" placeholder="Juan">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Apellido</label>
+                                <input type="text" id="pre-apellido" class="form-control form-control-custom" placeholder="Perez">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Nombre de usuario</label>
+                                <input type="text" id="pre-username" class="form-control form-control-custom" placeholder="juanperez">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Contraseña</label>
+                                <input type="password" id="pre-password-nuevo" class="form-control form-control-custom" placeholder="*****">
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <label for="pre-nombre" class="form-label fw-semibold">Nombre</label>
-                            <input type="text" id="pre-nombre" class="form-control form-control-custom" required
-                                placeholder="Ej. Juan">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="pre-apellido" class="form-label fw-semibold">Apellido</label>
-                            <input type="text" id="pre-apellido" class="form-control form-control-custom" required
-                                placeholder="Ej. Perez">
-                        </div>
-                        <div class="col-12">
-                            <label for="pre-correo" class="form-label fw-semibold">Correo Electronico</label>
-                            <input type="email" id="pre-correo" class="form-control form-control-custom" required
-                                placeholder="ejemplo@correo.com">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="pre-username" class="form-label fw-semibold">Nombre de Usuario (Para
-                                acceder)</label>
-                            <input type="text" id="pre-username" class="form-control form-control-custom" required
-                                placeholder="juanperez">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="pre-password" class="form-label fw-semibold">Contraseña</label>
-                            <input type="password" id="pre-password" class="form-control form-control-custom" required
-                                placeholder="*****">
-                        </div>
+                        <button type="button" class="btn btn-primary-custom w-100 mt-3" onclick="confirmarInscripcionNuevo()">
+                            <i class="fa-solid fa-user-plus me-1"></i> Crear cuenta e Inscribirme
+                        </button>
+                        <button type="button" class="btn btn-link w-100 mt-1 text-muted small" onclick="volverPaso1()">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Cambiar correo
+                        </button>
                     </div>
-                    <div class="modal-footer modal-footer-custom">
-                        <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary-custom">Confirmar Inscripcion</button>
+
+                    <!-- Paso 2b: El correo SI existe - ingresar contraseña -->
+                    <div id="paso-2-existente" class="d-none">
+                        <p class="small text-muted mb-1">Hola de nuevo, <strong id="pre-nombre-existente"></strong>! Ingresa tu contraseña para continuar.</p>
+                        <label class="form-label fw-semibold mt-2">Contraseña</label>
+                        <input type="password" id="pre-password-existente" class="form-control form-control-custom" placeholder="*****">
+                        <div id="pre-error-login" class="text-danger small mt-2 d-none">
+                            <i class="fa-solid fa-circle-exclamation me-1"></i> Contraseña incorrecta.
+                        </div>
+                        <button type="button" class="btn btn-primary-custom w-100 mt-3" onclick="confirmarInscripcionExistente()">
+                            <i class="fa-solid fa-sign-in-alt me-1"></i> Ingresar e Inscribirme
+                        </button>
+                        <button type="button" class="btn btn-link w-100 mt-1 text-muted small" onclick="volverPaso1()">
+                            <i class="fa-solid fa-arrow-left me-1"></i> Cambiar correo
+                        </button>
                     </div>
-                </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal voucher de inscripcion -->
+    <div class="modal fade" id="modalVoucher" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-content-custom">
+                <div class="modal-header modal-header-custom">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-ticket me-2"></i>Comprobante de Inscripcion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body modal-body-custom">
+                    <div id="voucher-contenido" class="p-3 border rounded bg-light">
+                        <div class="text-center mb-3">
+                            <img src="img/logoAtelier.png" style="max-height:50px;" alt="Atelier">
+                            <h6 class="fw-bold mt-2 mb-0">Atelier - Academia de Oficios y Artes</h6>
+                            <small class="text-muted">Comprobante de Inscripcion</small>
+                        </div>
+                        <hr>
+                        <p class="mb-1"><strong>Alumno:</strong> <span id="voucher-alumno"></span></p>
+                        <p class="mb-1"><strong>Correo:</strong> <span id="voucher-correo"></span></p>
+                        <p class="mb-1"><strong>Taller:</strong> <span id="voucher-taller"></span></p>
+                        <p class="mb-1"><strong>Horarios:</strong> <span id="voucher-horarios"></span></p>
+                        <p class="mb-1"><strong>Fecha de inscripcion:</strong> <span id="voucher-fecha"></span></p>
+                        <hr>
+                        <p class="small text-muted text-center mb-0">Guarda este comprobante para tus registros.</p>
+                    </div>
+                </div>
+                <div class="modal-footer modal-footer-custom">
+                    <button type="button" class="btn btn-secondary-custom" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary-custom" onclick="descargarVoucherPDF()">
+                        <i class="fa-solid fa-file-pdf me-1"></i> Descargar PDF
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.8/js/bootstrap.bundle.min.js"></script>
+    <!-- jsPDF para exportar PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
-    <script src="/js/talleres.js?v=1.3"></script>
+    <script src="/js/talleres.js?v=2.0"></script>
 </body>
 
 </html>

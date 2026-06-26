@@ -374,3 +374,23 @@ hr {
 .bg-brand-green {
     background-color: var(--brand-green) !important;
 }
+
+#voucher-contenido {
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+#voucher-contenido hr {
+    border-color: #ccc;
+    margin: 0.75rem 0;
+}
+
+.fila-horario .form-select,
+.fila-horario .form-control {
+    font-size: 0.875rem;
+}
+
+#paso-2-nuevo .form-label,
+#paso-2-existente .form-label {
+    font-size: 0.85rem;
+}

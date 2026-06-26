@@ -21,18 +21,21 @@ const agregar = (req, res) => {
         return;
     }
     const rolUsuario = role || 'alumno';
-    db.query('INSERT INTO usuarios (nombre, apellido, correo, username, password, role) VALUES (?, ?, ?, ?, ?, ?)', [nombre, apellido, correo, username, password, rolUsuario], (err, resultado) => {
-        if (err) {
-            if (err.code === 'ER_DUP_ENTRY') {
-                res.status(400).json({ error: 'El correo o username ya estan registrados' });
-            } else {
-                res.status(500).json({ error: 'Error al registrar usuario' });
+    db.query('INSERT INTO usuarios (nombre, apellido, correo, username, password, role) VALUES (?, ?, ?, ?, ?, ?)',
+        [nombre, apellido, correo, username, password, rolUsuario],
+        (err, resultado) => {
+            if (err) {
+                if (err.code === 'ER_DUP_ENTRY') {
+                    res.status(400).json({ error: 'El correo o username ya estan registrados' });
+                } else {
+                    res.status(500).json({ error: 'Error al registrar usuario' });
+                }
+                return;
             }
-            return;
+            const nuevo = new Usuario(resultado.insertId, nombre, apellido, correo, username, null, rolUsuario);
+            res.status(201).json(nuevo);
         }
-        const nuevo = new Usuario(resultado.insertId, nombre, apellido, correo, username, null, rolUsuario);
-        res.status(201).json(nuevo);
-    });
+    );
 };
 
 const editar = (req, res) => {
@@ -126,4 +129,23 @@ const login = (req, res) => {
     });
 };
 
-module.exports = { listar, agregar, editar, eliminar, login };
+const verificarCorreo = (req, res) => {
+    const { correo } = req.query;
+    if (!correo) {
+        res.status(400).json({ error: 'El correo es requerido' });
+        return;
+    }
+    db.query('SELECT id, nombre, apellido, username FROM usuarios WHERE correo = ?', [correo], (err, filas) => {
+        if (err) {
+            res.status(500).json({ error: 'Error al verificar correo' });
+            return;
+        }
+        if (filas.length === 0) {
+            res.json({ existe: false });
+        } else {
+            res.json({ existe: true, nombre: filas[0].nombre, username: filas[0].username });
+        }
+    });
+};
+
+module.exports = { listar, agregar, editar, eliminar, login, verificarCorreo };
